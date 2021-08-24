@@ -1,10 +1,13 @@
 Based on https://github.com/linuxserver/docker-qbittorrent
 
+# Be aware.
+File root/etc/cont-init.d/30-config is adding user to group backup.
 
 sudo docker build --tag qbittorrent-xpra .
 
 sudo docker run -it \
   --name=qbittorrent-xpra \
+  --net=docker-wg0 \
   -e PUID=1000 \
   -e PGID=1000 \
   -e TZ=Europe/Stockholm \
@@ -16,32 +19,25 @@ sudo docker run -it \
   -p 54918:54918 \
   -p 54918:54918/udp \
   -p 6881:6881 \
-  -v /home/magma/Docker/qbittorrent-xpra/config:/config \
-  -v /home/magma/Docker/qbittorrent-xpra/downloads:/downloads \
+  -v /home/ganja/Docker/qbittorrent-xpra/config:/config \
+  -v /data:/data \
   qbittorrent-xpra
-#  --net=docker-wg0 \
 
-xpra --desktop-scaling=off --speaker=disabled --microphone=disabled attach tcp://127.0.0.1:3388/10
+# qbittorrent isn't automatically starting, if you wish for it to do so, remove the down-file in the service directory.
+# Manually start it with:
 sudo docker exec -it qbittorrent-xpra s6-svc -uO /var/run/s6/services/qbittorrent
 
-
-TODO:
-* Routing over wireguard
-* Firewall something? hopefully no changes needed.
-* Port syntax to docker-compose.
-* Add to github.
-* Shell script that sends to pushover.
-  Shouldn't be harder than to add it into the config directory and change path.
+# Attach to xpra
+iptables -I FORWARD -p tcp -s 10.16.4.0/24 --dport 3388 -j ACCEPT
+xpra --desktop-scaling=off --speaker=disabled --microphone=disabled attach tcp://127.0.0.1:3388/10
 
 
-
-# https://nickb.dev/blog/routing-select-docker-containers-through-wireguard-vpn
-#docker network create docker-vpn0 --subnet 10.193.0.0/16
+If you wish for the container to use a specific network interface, like VPN, you can do it similar to this:
+(based on https://nickb.dev/blog/routing-select-docker-containers-through-wireguard-vpn)
 docker network create docker-wg0 --subnet 172.18.0.0/24
-#ip rule add from 10.193.0.0/16 table 200
 ip rule add from 172.18.0.0/24 table 43
-#ip route add default via 10.192.122.2 table 43
+ip route add 10.16.0.0/16 via 10.16.1.1 table 43
 ip route add default dev wg0 table 43
-docker run -ti --rm --net=docker-wg0 appropriate/curl http://httpbin.org/ip
 
-
+You can then test it with the following command. It should return your VPNs external IP.
+sudo docker run -ti --rm --net=docker-wg0 appropriate/curl http://httpbin.org/ip
