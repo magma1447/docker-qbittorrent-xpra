@@ -9,4 +9,4 @@ fi
 
 export DISPLAY=":${DISPLAY}"
 exec \
-	s6-setuidgid abc /opt/google/chrome/chrome --no-sandbox
+	s6-setuidgid abc /usr/bin/firefox

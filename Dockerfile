@@ -23,10 +23,10 @@ RUN \
   apt-get update && \
   apt-get install -y \
     xpra && \
-  echo "**** install chrome ****" && \
-  curl -LO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
-  apt-get install -y ./google-chrome-stable_current_amd64.deb && \
-  rm google-chrome-stable_current_amd64.deb && \
+  echo "**** install firefox ****" && \
+  apt-get update && \
+  apt-get install -y \
+    firefox && \
   echo "***** add qbitorrent repositories ****" && \
   apt-get update && \
   apt-get install -y \
@@ -62,6 +62,6 @@ RUN \
 COPY root/ /
 
 # ports and volumes
-EXPOSE 6881 6881/udp 8080
+EXPOSE 3388 54918 54918/udp 6881
 VOLUME /config
 
