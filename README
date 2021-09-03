@@ -1,7 +1,7 @@
 Based on https://github.com/linuxserver/docker-qbittorrent
 
 # Be aware.
-File root/etc/cont-init.d/30-config is adding user to group backup.
+File root/etc/cont-init.d/30-config is adding user to group adm and backup.
 
 sudo docker build --tag qbittorrent-xpra .
 
